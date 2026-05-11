@@ -1,5 +1,6 @@
 {
   "name": "Crestron Bridge",
   "render_readme": true,
-  "homeassistant": "2023.1.0"
+  "homeassistant": "2023.1.0",
+  "icon": "custom_components/crestron_bridge/icon.png"
 }
