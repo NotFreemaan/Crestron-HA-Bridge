@@ -13,19 +13,19 @@
 
 ## Supported Entity Types
 
-1. **Light/Switch Entities** (1-128 configurable)
+1. **Light/Switch Entities** (16 light entities)
    - Control Crestron lighting loads
    - Bidirectional state synchronization
 
-2. **Video Source Selection** (up to 4 endpoints)
+2. **Video Source Selection** (4 video endpoints)
    - Select from 8 video sources per endpoint
    - Custom naming for sources and endpoints
 
-3. **Volume Controls** (up to 4 zones)
+3. **Volume Controls** (4 zones)
    - 0-100% volume control
    - Automatic conversion from Crestron 0-65535 range
 
-4. **Mute Switches** (up to 4 zones)
+4. **Mute Switches** (4 zones)
    - Mute/unmute audio zones
    - Visual indicators
 
