@@ -1,0 +1,11 @@
+{
+  "domain": "crestron_bridge",
+  "name": "Crestron Bridge",
+  "codeowners": ["@NotFreemaan"],
+  "config_flow": true,
+  "documentation": "https://github.com/NotFreemaan/Crestron-HA-Private-Tester",
+  "issue_tracker": "https://github.com/NotFreemaan/Crestron-HA-Private-Tester/issues",
+  "requirements": [],
+  "version": "1.0.0",
+  "iot_class": "local_push"
+}
