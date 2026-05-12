@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Crestron Bridge Configuration",
-        "description": "Enter the TCP port HA will listen on. Configure the matching IP and port in your Crestron SIMPL module.",
+        "description": "Enter the TCP port HA will listen on. Configure the matching port in your Crestron SIMPL module.",
         "data": {
           "port": "TCP Port"
         }
