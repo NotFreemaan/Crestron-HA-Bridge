@@ -1,13 +1,12 @@
 """Coordinator for Crestron Bridge integration."""
 import asyncio
 import logging
-from typing import Any, Optional
+from typing import Optional
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
-    AUDIO_ZONE_NAMES,
     CMD_KEEPALIVE,
     CMD_LIGHT,
     CMD_MUTE,
@@ -25,33 +24,29 @@ from .const import (
     NUM_AUDIO_ZONES,
     NUM_LIGHTS,
     NUM_VIDEO_ENDPOINTS,
-    RECONNECT_INTERVAL,
     RESP_MUTE,
     RESP_STATUS,
     RESP_VOLSTATUS,
     RESP_VSTATUS,
-    VIDEO_ENDPOINT_NAMES,
-    VIDEO_SOURCE_NAMES,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class CrestronCoordinator(DataUpdateCoordinator):
-    """Coordinator to manage Crestron TCP connection and state."""
+    """Coordinator to manage Crestron TCP server and state."""
 
-    def __init__(self, hass: HomeAssistant, host: str, port: int) -> None:
+    def __init__(self, hass: HomeAssistant, port: int) -> None:
         """Initialize the coordinator."""
         super().__init__(hass, _LOGGER, name=DOMAIN)
-        self.host = host
         self.port = port
 
+        self._server: Optional[asyncio.Server] = None
         self._reader: Optional[asyncio.StreamReader] = None
         self._writer: Optional[asyncio.StreamWriter] = None
         self._connected = False
-        self._stop = False
-        self._connection_task: Optional[asyncio.Task] = None
-        self._keepalive_task: Optional[asyncio.Task] = None
+        self._read_task: Optional[asyncio.Task] = None
+        self._client_address: Optional[str] = None
 
         self.data = {
             "lights": {i: False for i in range(1, NUM_LIGHTS + 1)},
@@ -62,50 +57,48 @@ class CrestronCoordinator(DataUpdateCoordinator):
         }
 
     async def async_start(self) -> None:
-        """Start the connection loop."""
-        self._stop = False
-        self._connection_task = asyncio.create_task(self._connection_loop())
+        """Start the TCP server."""
+        _LOGGER.info("Starting Crestron TCP server on port %s", self.port)
+        try:
+            self._server = await asyncio.start_server(
+                self._handle_client, "0.0.0.0", self.port
+            )
+            _LOGGER.info("Waiting for Crestron to connect on port %s", self.port)
+        except Exception as err:
+            _LOGGER.error("Failed to start TCP server: %s", err)
 
     async def async_stop(self) -> None:
-        """Stop the connection loop and disconnect."""
-        self._stop = True
-        if self._connection_task:
-            self._connection_task.cancel()
-        await self._disconnect()
+        """Stop the TCP server."""
+        if self._read_task:
+            self._read_task.cancel()
+        await self._disconnect_client()
+        if self._server:
+            self._server.close()
+            await self._server.wait_closed()
 
-    async def _connection_loop(self) -> None:
-        """Continuously connect to Crestron, reconnecting on failure."""
-        while not self._stop:
-            try:
-                _LOGGER.info("Connecting to Crestron at %s:%s", self.host, self.port)
-                reader, writer = await asyncio.open_connection(self.host, self.port)
-                self._reader = reader
-                self._writer = writer
-                self._connected = True
-                self.data["connected"] = True
-                self.async_set_updated_data(self.data)
-                _LOGGER.info("Connected to Crestron at %s:%s", self.host, self.port)
+    async def _handle_client(
+        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+    ) -> None:
+        """Handle incoming Crestron connection."""
+        addr = writer.get_extra_info("peername")
+        self._client_address = f"{addr[0]}:{addr[1]}"
+        _LOGGER.info("Crestron connected from %s", self._client_address)
 
-                self._keepalive_task = asyncio.create_task(self._keepalive_loop())
-                await self._sync_all_states()
-                await self._read_loop()
+        if self._connected:
+            _LOGGER.warning("New connection received, dropping existing client")
+            await self._disconnect_client()
 
-            except asyncio.CancelledError:
-                break
-            except Exception as err:
-                _LOGGER.error("Crestron connection error: %s", err)
-            finally:
-                if self._keepalive_task:
-                    self._keepalive_task.cancel()
-                    self._keepalive_task = None
-                await self._disconnect()
+        self._reader = reader
+        self._writer = writer
+        self._connected = True
+        self.data["connected"] = True
+        self.async_set_updated_data(self.data)
 
-            if not self._stop:
-                _LOGGER.info("Reconnecting in %s seconds...", RECONNECT_INTERVAL)
-                await asyncio.sleep(RECONNECT_INTERVAL)
+        self._read_task = asyncio.create_task(self._read_loop())
+        await self._sync_all_states()
 
-    async def _disconnect(self) -> None:
-        """Close the current connection."""
+    async def _disconnect_client(self) -> None:
+        """Disconnect the current client."""
         self._connected = False
         self.data["connected"] = False
         if self._writer:
@@ -116,16 +109,18 @@ class CrestronCoordinator(DataUpdateCoordinator):
                 pass
         self._reader = None
         self._writer = None
+        self._client_address = None
         self.async_set_updated_data(self.data)
 
     async def _read_loop(self) -> None:
-        """Read and process messages from Crestron."""
+        """Read messages from the connected Crestron client."""
         buffer = ""
         while self._connected and self._reader:
             try:
                 data = await self._reader.read(1024)
                 if not data:
-                    _LOGGER.warning("Crestron disconnected")
+                    _LOGGER.warning("Crestron disconnected from %s", self._client_address)
+                    await self._disconnect_client()
                     break
 
                 buffer += data.decode("ascii", errors="ignore")
@@ -139,14 +134,8 @@ class CrestronCoordinator(DataUpdateCoordinator):
                 break
             except Exception as err:
                 _LOGGER.error("Error reading from Crestron: %s", err)
+                await self._disconnect_client()
                 break
-
-    async def _keepalive_loop(self) -> None:
-        """Send periodic keepalive messages."""
-        while self._connected:
-            await asyncio.sleep(KEEPALIVE_INTERVAL)
-            if self._connected:
-                await self._send_command(CMD_KEEPALIVE)
 
     async def _send_command(self, command: str) -> None:
         """Send a command to Crestron."""
@@ -159,10 +148,10 @@ class CrestronCoordinator(DataUpdateCoordinator):
             _LOGGER.debug("Sent: %s", command)
         except Exception as err:
             _LOGGER.error("Error sending command: %s", err)
-            await self._disconnect()
+            await self._disconnect_client()
 
     async def _process_message(self, message: str) -> None:
-        """Process incoming message from Crestron."""
+        """Process an incoming message from Crestron."""
         _LOGGER.debug("Received: %s", message)
         parts = message.split(":")
 
@@ -212,7 +201,7 @@ class CrestronCoordinator(DataUpdateCoordinator):
             _LOGGER.warning("Error parsing message '%s': %s", message, err)
 
     async def _sync_all_states(self) -> None:
-        """Query all states from Crestron."""
+        """Query all states from Crestron after connection."""
         _LOGGER.info("Syncing all states from Crestron")
 
         for i in range(1, NUM_LIGHTS + 1):
@@ -261,11 +250,11 @@ class CrestronCoordinator(DataUpdateCoordinator):
         await self._send_command(f"{CMD_MUTEQUERY}:{zone}")
 
     async def reconnect(self) -> None:
-        """Manually trigger reconnection."""
+        """Drop the current client, forcing Crestron to reconnect."""
         _LOGGER.info("Manual reconnection triggered")
-        await self._disconnect()
+        await self._disconnect_client()
 
     async def resync(self) -> None:
-        """Manually trigger state resync."""
+        """Manually trigger a full state resync."""
         _LOGGER.info("Manual resync triggered")
         await self._sync_all_states()

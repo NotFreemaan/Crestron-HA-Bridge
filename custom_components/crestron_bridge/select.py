@@ -55,7 +55,7 @@ class CrestronVideoSourceSelect(CoordinatorEntity, SelectEntity):
         self._source_names = source_names
         self._attr_name = f"Crestron {endpoint_name} Source"
         self._attr_unique_id = (
-            f"crestron_bridge_{coordinator.host}_{coordinator.port}_video_{endpoint}"
+            f"crestron_bridge_{coordinator.port}_video_{endpoint}"
         )
         self._attr_options = source_names
         self._attr_icon = "mdi:video-input-hdmi"
@@ -85,8 +85,8 @@ class CrestronVideoSourceSelect(CoordinatorEntity, SelectEntity):
     def device_info(self):
         """Return device information."""
         return {
-            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.host}_{self.coordinator.port}")},
-            "name": f"Crestron Bridge ({self.coordinator.host})",
+            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.port}")},
+            "name": f"Crestron Bridge (Port {self.coordinator.port})",
             "manufacturer": "Github@NotFreemaan",
             "model": "TCP Bridge",
         }

@@ -38,7 +38,7 @@ class CrestronReconnectButton(CoordinatorEntity, ButtonEntity):
         """Initialize the reconnect button."""
         super().__init__(coordinator)
         self._attr_name = "Crestron Reconnect"
-        self._attr_unique_id = f"crestron_bridge_{coordinator.host}_{coordinator.port}_reconnect"
+        self._attr_unique_id = f"crestron_bridge_{coordinator.port}_reconnect"
         self._attr_icon = "mdi:connection"
 
     async def async_press(self) -> None:
@@ -50,8 +50,8 @@ class CrestronReconnectButton(CoordinatorEntity, ButtonEntity):
     def device_info(self):
         """Return device information."""
         return {
-            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.host}_{self.coordinator.port}")},
-            "name": f"Crestron Bridge ({self.coordinator.host})",
+            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.port}")},
+            "name": f"Crestron Bridge (Port {self.coordinator.port})",
             "manufacturer": "Github@NotFreemaan",
             "model": "TCP Bridge",
         }
@@ -64,7 +64,7 @@ class CrestronResyncButton(CoordinatorEntity, ButtonEntity):
         """Initialize the resync button."""
         super().__init__(coordinator)
         self._attr_name = "Crestron Resync"
-        self._attr_unique_id = f"crestron_bridge_{coordinator.host}_{coordinator.port}_resync"
+        self._attr_unique_id = f"crestron_bridge_{coordinator.port}_resync"
         self._attr_icon = "mdi:sync"
 
     async def async_press(self) -> None:
@@ -76,8 +76,8 @@ class CrestronResyncButton(CoordinatorEntity, ButtonEntity):
     def device_info(self):
         """Return device information."""
         return {
-            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.host}_{self.coordinator.port}")},
-            "name": f"Crestron Bridge ({self.coordinator.host})",
+            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.port}")},
+            "name": f"Crestron Bridge (Port {self.coordinator.port})",
             "manufacturer": "Github@NotFreemaan",
             "model": "TCP Bridge",
         }

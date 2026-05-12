@@ -5,8 +5,7 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_HOST, CONF_PORT
-from homeassistant.core import HomeAssistant
+from homeassistant.const import CONF_PORT
 from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
 
@@ -27,23 +26,18 @@ class CrestronBridgeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            host = user_input[CONF_HOST]
             port = user_input[CONF_PORT]
 
-            await self.async_set_unique_id(f"crestron_bridge_{host}_{port}")
+            await self.async_set_unique_id(f"crestron_bridge_{port}")
             self._abort_if_unique_id_configured()
 
             return self.async_create_entry(
-                title=f"Crestron Bridge ({host}:{port})",
-                data={
-                    CONF_HOST: host,
-                    CONF_PORT: port,
-                },
+                title=f"Crestron Bridge (Port {port})",
+                data={CONF_PORT: port},
             )
 
         data_schema = vol.Schema(
             {
-                vol.Required(CONF_HOST): cv.string,
                 vol.Required(CONF_PORT, default=DEFAULT_PORT): cv.port,
             }
         )

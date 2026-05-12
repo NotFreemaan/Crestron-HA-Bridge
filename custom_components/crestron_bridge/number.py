@@ -48,7 +48,7 @@ class CrestronVolumeControl(CoordinatorEntity, NumberEntity):
         self._zone = zone
         self._zone_name = zone_name
         self._attr_name = f"Crestron {zone_name} Volume"
-        self._attr_unique_id = f"crestron_bridge_{coordinator.host}_{coordinator.port}_volume_{zone}"
+        self._attr_unique_id = f"crestron_bridge_{coordinator.port}_volume_{zone}"
         self._attr_icon = "mdi:volume-high"
 
     @property
@@ -69,8 +69,8 @@ class CrestronVolumeControl(CoordinatorEntity, NumberEntity):
     def device_info(self):
         """Return device information."""
         return {
-            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.host}_{self.coordinator.port}")},
-            "name": f"Crestron Bridge ({self.coordinator.host})",
+            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.port}")},
+            "name": f"Crestron Bridge (Port {self.coordinator.port})",
             "manufacturer": "Github@NotFreemaan",
             "model": "TCP Bridge",
         }

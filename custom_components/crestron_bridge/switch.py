@@ -44,7 +44,7 @@ class CrestronLightSwitch(CoordinatorEntity, SwitchEntity):
         super().__init__(coordinator)
         self._light_num = light_num
         self._attr_name = f"Crestron Light {light_num}"
-        self._attr_unique_id = f"crestron_bridge_{coordinator.host}_{coordinator.port}_light_{light_num}"
+        self._attr_unique_id = f"crestron_bridge_{coordinator.port}_light_{light_num}"
 
     @property
     def is_on(self) -> bool:
@@ -68,8 +68,8 @@ class CrestronLightSwitch(CoordinatorEntity, SwitchEntity):
     def device_info(self):
         """Return device information."""
         return {
-            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.host}_{self.coordinator.port}")},
-            "name": f"Crestron Bridge ({self.coordinator.host})",
+            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.port}")},
+            "name": f"Crestron Bridge (Port {self.coordinator.port})",
             "manufacturer": "Github@NotFreemaan",
             "model": "TCP Bridge",
         }
@@ -86,7 +86,7 @@ class CrestronMuteSwitch(CoordinatorEntity, SwitchEntity):
         self._zone = zone
         self._zone_name = zone_name
         self._attr_name = f"Crestron {zone_name} Mute"
-        self._attr_unique_id = f"crestron_bridge_{coordinator.host}_{coordinator.port}_mute_{zone}"
+        self._attr_unique_id = f"crestron_bridge_{coordinator.port}_mute_{zone}"
 
     @property
     def is_on(self) -> bool:
@@ -115,8 +115,8 @@ class CrestronMuteSwitch(CoordinatorEntity, SwitchEntity):
     def device_info(self):
         """Return device information."""
         return {
-            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.host}_{self.coordinator.port}")},
-            "name": f"Crestron Bridge ({self.coordinator.host})",
+            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.port}")},
+            "name": f"Crestron Bridge (Port {self.coordinator.port})",
             "manufacturer": "Github@NotFreemaan",
             "model": "TCP Bridge",
         }

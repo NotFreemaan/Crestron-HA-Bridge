@@ -3,9 +3,8 @@
     "step": {
       "user": {
         "title": "Crestron Bridge Configuration",
-        "description": "Enter the IP address and TCP port of the Crestron processor",
+        "description": "Enter the TCP port HA will listen on. Configure the matching IP and port in your Crestron SIMPL module.",
         "data": {
-          "host": "Crestron Processor IP Address",
           "port": "TCP Port"
         }
       }
@@ -14,7 +13,7 @@
       "unknown": "Unexpected error occurred"
     },
     "abort": {
-      "already_configured": "This processor is already configured"
+      "already_configured": "This port is already configured"
     }
   }
 }

@@ -3,7 +3,6 @@
 DOMAIN = "crestron_bridge"
 
 # Configuration keys
-CONF_HOST = "host"
 CONF_PORT = "port"
 
 # Defaults
