@@ -86,7 +86,7 @@ class CrestronVideoSourceSelect(CoordinatorEntity, SelectEntity):
         """Return device information."""
         return {
             "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.port}")},
-            "name": f"Crestron Bridge (Port {self.coordinator.port})",
+            "name": f"Crestron HA Bridge (Port {self.coordinator.port})",
             "manufacturer": "Github@NotFreemaan",
-            "model": "TCP Bridge",
+            "model": "Crestron HA Integration",
         }
