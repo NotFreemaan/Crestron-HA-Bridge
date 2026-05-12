@@ -3,24 +3,20 @@
 DOMAIN = "crestron_bridge"
 
 # Configuration keys
+CONF_HOST = "host"
 CONF_PORT = "port"
-CONF_NUM_LIGHTS = "num_lights"
-CONF_NUM_VIDEO_ENDPOINTS = "num_video_endpoints"
-CONF_NUM_AUDIO_ZONES = "num_audio_zones"
-CONF_VIDEO_SOURCE_NAMES = "video_source_names"
-CONF_VIDEO_ENDPOINT_NAMES = "video_endpoint_names"
-CONF_AUDIO_ZONE_NAMES = "audio_zone_names"
 
 # Defaults
 DEFAULT_PORT = 50001
-DEFAULT_NUM_LIGHTS = 16
-DEFAULT_NUM_VIDEO_ENDPOINTS = 4
-DEFAULT_NUM_AUDIO_ZONES = 4
-DEFAULT_VIDEO_SOURCES = 8
-MAX_LIGHTS = 128
 
-# Default names
-DEFAULT_VIDEO_SOURCE_NAMES = [
+# Fixed entity counts
+NUM_LIGHTS = 16
+NUM_VIDEO_ENDPOINTS = 4
+NUM_AUDIO_ZONES = 4
+NUM_VIDEO_SOURCES = 8
+
+# Fixed names
+VIDEO_SOURCE_NAMES = [
     "Off",
     "Apple TV",
     "Xbox",
@@ -28,21 +24,21 @@ DEFAULT_VIDEO_SOURCE_NAMES = [
     "Cable Box",
     "Blu-ray",
     "Streaming Device",
-    "PC"
+    "PC",
 ]
 
-DEFAULT_VIDEO_ENDPOINT_NAMES = [
+VIDEO_ENDPOINT_NAMES = [
     "Living Room TV",
     "Bedroom TV",
     "Office TV",
-    "Patio TV"
+    "Patio TV",
 ]
 
-DEFAULT_AUDIO_ZONE_NAMES = [
+AUDIO_ZONE_NAMES = [
     "Living Room",
     "Bedroom",
     "Office",
-    "Patio"
+    "Patio",
 ]
 
 # Protocol constants

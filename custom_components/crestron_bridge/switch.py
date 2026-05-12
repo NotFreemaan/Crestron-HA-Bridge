@@ -8,7 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_AUDIO_ZONE_NAMES, CONF_NUM_AUDIO_ZONES, CONF_NUM_LIGHTS, DOMAIN
+from .const import AUDIO_ZONE_NAMES, DOMAIN, NUM_AUDIO_ZONES, NUM_LIGHTS
 from .coordinator import CrestronCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -23,20 +23,14 @@ async def async_setup_entry(
     coordinator: CrestronCoordinator = hass.data[DOMAIN][config_entry.entry_id][
         "coordinator"
     ]
-    config = hass.data[DOMAIN][config_entry.entry_id]["config"]
 
     entities = []
 
-    # Create light switches
-    num_lights = config[CONF_NUM_LIGHTS]
-    for i in range(1, num_lights + 1):
+    for i in range(1, NUM_LIGHTS + 1):
         entities.append(CrestronLightSwitch(coordinator, i))
 
-    # Create mute switches
-    num_audio_zones = config[CONF_NUM_AUDIO_ZONES]
-    audio_zone_names = config[CONF_AUDIO_ZONE_NAMES]
-    for i in range(1, num_audio_zones + 1):
-        zone_name = audio_zone_names[i - 1] if i - 1 < len(audio_zone_names) else f"Zone {i}"
+    for i in range(1, NUM_AUDIO_ZONES + 1):
+        zone_name = AUDIO_ZONE_NAMES[i - 1] if i - 1 < len(AUDIO_ZONE_NAMES) else f"Zone {i}"
         entities.append(CrestronMuteSwitch(coordinator, i, zone_name))
 
     async_add_entities(entities)
@@ -50,7 +44,7 @@ class CrestronLightSwitch(CoordinatorEntity, SwitchEntity):
         super().__init__(coordinator)
         self._light_num = light_num
         self._attr_name = f"Crestron Light {light_num}"
-        self._attr_unique_id = f"crestron_bridge_{coordinator.port}_light_{light_num}"
+        self._attr_unique_id = f"crestron_bridge_{coordinator.host}_{coordinator.port}_light_{light_num}"
 
     @property
     def is_on(self) -> bool:
@@ -74,8 +68,8 @@ class CrestronLightSwitch(CoordinatorEntity, SwitchEntity):
     def device_info(self):
         """Return device information."""
         return {
-            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.port}")},
-            "name": f"Crestron Bridge (Port {self.coordinator.port})",
+            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.host}_{self.coordinator.port}")},
+            "name": f"Crestron Bridge ({self.coordinator.host})",
             "manufacturer": "Github@NotFreemaan",
             "model": "TCP Bridge",
         }
@@ -92,7 +86,7 @@ class CrestronMuteSwitch(CoordinatorEntity, SwitchEntity):
         self._zone = zone
         self._zone_name = zone_name
         self._attr_name = f"Crestron {zone_name} Mute"
-        self._attr_unique_id = f"crestron_bridge_{coordinator.port}_mute_{zone}"
+        self._attr_unique_id = f"crestron_bridge_{coordinator.host}_{coordinator.port}_mute_{zone}"
 
     @property
     def is_on(self) -> bool:
@@ -121,8 +115,8 @@ class CrestronMuteSwitch(CoordinatorEntity, SwitchEntity):
     def device_info(self):
         """Return device information."""
         return {
-            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.port}")},
-            "name": f"Crestron Bridge (Port {self.coordinator.port})",
+            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.host}_{self.coordinator.port}")},
+            "name": f"Crestron Bridge ({self.coordinator.host})",
             "manufacturer": "Github@NotFreemaan",
             "model": "TCP Bridge",
         }

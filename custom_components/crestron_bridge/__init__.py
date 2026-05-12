@@ -2,16 +2,10 @@
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_PORT
+from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import HomeAssistant
 
-from .const import (
-    CONF_NUM_AUDIO_ZONES,
-    CONF_NUM_LIGHTS,
-    CONF_NUM_VIDEO_ENDPOINTS,
-    DOMAIN,
-    PLATFORMS,
-)
+from .const import DOMAIN, PLATFORMS
 from .coordinator import CrestronCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -19,21 +13,14 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Crestron Bridge from a config entry."""
+    host = entry.data[CONF_HOST]
     port = entry.data[CONF_PORT]
-    num_lights = entry.data[CONF_NUM_LIGHTS]
-    num_video_endpoints = entry.data[CONF_NUM_VIDEO_ENDPOINTS]
-    num_audio_zones = entry.data[CONF_NUM_AUDIO_ZONES]
 
-    coordinator = CrestronCoordinator(
-        hass, port, num_lights, num_video_endpoints, num_audio_zones
-    )
+    coordinator = CrestronCoordinator(hass, host, port)
 
     # Store coordinator
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = {
-        "coordinator": coordinator,
-        "config": entry.data,
-    }
+    hass.data[DOMAIN][entry.entry_id] = {"coordinator": coordinator}
 
     # Start the coordinator
     await coordinator.async_start()

@@ -7,12 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import (
-    CONF_NUM_VIDEO_ENDPOINTS,
-    CONF_VIDEO_ENDPOINT_NAMES,
-    CONF_VIDEO_SOURCE_NAMES,
-    DOMAIN,
-)
+from .const import DOMAIN, NUM_VIDEO_ENDPOINTS, VIDEO_ENDPOINT_NAMES, VIDEO_SOURCE_NAMES
 from .coordinator import CrestronCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -27,25 +22,17 @@ async def async_setup_entry(
     coordinator: CrestronCoordinator = hass.data[DOMAIN][config_entry.entry_id][
         "coordinator"
     ]
-    config = hass.data[DOMAIN][config_entry.entry_id]["config"]
 
     entities = []
 
-    # Create video source selects
-    num_video_endpoints = config[CONF_NUM_VIDEO_ENDPOINTS]
-    video_source_names = config[CONF_VIDEO_SOURCE_NAMES]
-    video_endpoint_names = config[CONF_VIDEO_ENDPOINT_NAMES]
-
-    for i in range(1, num_video_endpoints + 1):
+    for i in range(1, NUM_VIDEO_ENDPOINTS + 1):
         endpoint_name = (
-            video_endpoint_names[i - 1]
-            if i - 1 < len(video_endpoint_names)
+            VIDEO_ENDPOINT_NAMES[i - 1]
+            if i - 1 < len(VIDEO_ENDPOINT_NAMES)
             else f"Endpoint {i}"
         )
         entities.append(
-            CrestronVideoSourceSelect(
-                coordinator, i, endpoint_name, video_source_names
-            )
+            CrestronVideoSourceSelect(coordinator, i, endpoint_name, VIDEO_SOURCE_NAMES)
         )
 
     async_add_entities(entities)
@@ -68,7 +55,7 @@ class CrestronVideoSourceSelect(CoordinatorEntity, SelectEntity):
         self._source_names = source_names
         self._attr_name = f"Crestron {endpoint_name} Source"
         self._attr_unique_id = (
-            f"crestron_bridge_{coordinator.port}_video_{endpoint}"
+            f"crestron_bridge_{coordinator.host}_{coordinator.port}_video_{endpoint}"
         )
         self._attr_options = source_names
         self._attr_icon = "mdi:video-input-hdmi"
@@ -98,8 +85,8 @@ class CrestronVideoSourceSelect(CoordinatorEntity, SelectEntity):
     def device_info(self):
         """Return device information."""
         return {
-            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.port}")},
-            "name": f"Crestron Bridge (Port {self.coordinator.port})",
+            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.host}_{self.coordinator.port}")},
+            "name": f"Crestron Bridge ({self.coordinator.host})",
             "manufacturer": "Github@NotFreemaan",
             "model": "TCP Bridge",
         }

@@ -3,26 +3,10 @@
     "step": {
       "user": {
         "title": "Crestron Bridge Configuration",
-        "description": "Configure TCP server for Crestron processor connection",
+        "description": "Enter the IP address and TCP port of the Crestron processor",
         "data": {
-          "port": "TCP Port (Crestron will connect to this)",
-          "num_lights": "Number of Lights",
-          "num_video_endpoints": "Number of Video Endpoints",
-          "num_audio_zones": "Number of Audio Zones"
-        }
-      },
-      "customize": {
-        "title": "Customize Entity Names",
-        "description": "Customize names for video sources, endpoints, and audio zones (optional)",
-        "data": {
-          "video_source_names": "Video Source Names (comma-separated)",
-          "video_endpoint_names": "Video Endpoint Names (comma-separated)",
-          "audio_zone_names": "Audio Zone Names (comma-separated)"
-        },
-        "data_description": {
-          "video_source_names": "Enter 8 source names separated by commas (e.g., Off, Apple TV, Xbox, etc.)",
-          "video_endpoint_names": "Enter endpoint names separated by commas (e.g., Living Room TV, Bedroom TV, etc.)",
-          "audio_zone_names": "Enter zone names separated by commas (e.g., Living Room, Bedroom, etc.)"
+          "host": "Crestron Processor IP Address",
+          "port": "TCP Port"
         }
       }
     },
@@ -30,7 +14,7 @@
       "unknown": "Unexpected error occurred"
     },
     "abort": {
-      "already_configured": "This port is already configured"
+      "already_configured": "This processor is already configured"
     }
   }
 }

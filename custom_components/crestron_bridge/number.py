@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_AUDIO_ZONE_NAMES, CONF_NUM_AUDIO_ZONES, DOMAIN
+from .const import AUDIO_ZONE_NAMES, DOMAIN, NUM_AUDIO_ZONES
 from .coordinator import CrestronCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -22,18 +22,11 @@ async def async_setup_entry(
     coordinator: CrestronCoordinator = hass.data[DOMAIN][config_entry.entry_id][
         "coordinator"
     ]
-    config = hass.data[DOMAIN][config_entry.entry_id]["config"]
 
     entities = []
 
-    # Create volume controls
-    num_audio_zones = config[CONF_NUM_AUDIO_ZONES]
-    audio_zone_names = config[CONF_AUDIO_ZONE_NAMES]
-
-    for i in range(1, num_audio_zones + 1):
-        zone_name = (
-            audio_zone_names[i - 1] if i - 1 < len(audio_zone_names) else f"Zone {i}"
-        )
+    for i in range(1, NUM_AUDIO_ZONES + 1):
+        zone_name = AUDIO_ZONE_NAMES[i - 1] if i - 1 < len(AUDIO_ZONE_NAMES) else f"Zone {i}"
         entities.append(CrestronVolumeControl(coordinator, i, zone_name))
 
     async_add_entities(entities)
@@ -55,7 +48,7 @@ class CrestronVolumeControl(CoordinatorEntity, NumberEntity):
         self._zone = zone
         self._zone_name = zone_name
         self._attr_name = f"Crestron {zone_name} Volume"
-        self._attr_unique_id = f"crestron_bridge_{coordinator.port}_volume_{zone}"
+        self._attr_unique_id = f"crestron_bridge_{coordinator.host}_{coordinator.port}_volume_{zone}"
         self._attr_icon = "mdi:volume-high"
 
     @property
@@ -76,8 +69,8 @@ class CrestronVolumeControl(CoordinatorEntity, NumberEntity):
     def device_info(self):
         """Return device information."""
         return {
-            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.port}")},
-            "name": f"Crestron Bridge (Port {self.coordinator.port})",
+            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.host}_{self.coordinator.port}")},
+            "name": f"Crestron Bridge ({self.coordinator.host})",
             "manufacturer": "Github@NotFreemaan",
             "model": "TCP Bridge",
         }

@@ -35,7 +35,7 @@ class CrestronConnectionSensor(CoordinatorEntity, SensorEntity):
         """Initialize the connection sensor."""
         super().__init__(coordinator)
         self._attr_name = "Crestron Connection Status"
-        self._attr_unique_id = f"crestron_bridge_{coordinator.port}_connection"
+        self._attr_unique_id = f"crestron_bridge_{coordinator.host}_{coordinator.port}_connection"
 
     @property
     def native_value(self) -> str:
@@ -55,16 +55,16 @@ class CrestronConnectionSensor(CoordinatorEntity, SensorEntity):
     def extra_state_attributes(self):
         """Return additional state attributes."""
         return {
+            "host": self.coordinator.host,
             "port": self.coordinator.port,
-            "client_address": self.coordinator._client_address if self.coordinator._connected else None,
         }
 
     @property
     def device_info(self):
         """Return device information."""
         return {
-            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.port}")},
-            "name": f"Crestron Bridge (Port {self.coordinator.port})",
+            "identifiers": {(DOMAIN, f"crestron_bridge_{self.coordinator.host}_{self.coordinator.port}")},
+            "name": f"Crestron Bridge ({self.coordinator.host})",
             "manufacturer": "Github@NotFreemaan",
             "model": "TCP Bridge",
         }
